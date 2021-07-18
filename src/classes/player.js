@@ -1,4 +1,4 @@
-import PlayScene from "../PlayScene";
+import Bomb from './Bomb';
 
 export default class Player {
   constructor (sprite, tileSize, tilePos, destinationTile) {
@@ -6,6 +6,8 @@ export default class Player {
     this.TILE_SIZE = tileSize;
     this.TILE_OFFSET = tileSize / 2;
     this.physics = null;
+    this.playScene = null;
+    this.bombList = [];
     this.setPosition(tilePos[0], tilePos[1]);
     this.isMoving = false;
     this.destination = null;
@@ -31,6 +33,7 @@ export default class Player {
   }
 
   setPosition (x, y) {
+    // sets the player to the x, y coordinate. Adds offset
     this.playerSprite.setPosition(
       (x * this.TILE_SIZE) + this.TILE_OFFSET,
       (y * this.TILE_SIZE) + this.TILE_OFFSET
@@ -38,17 +41,18 @@ export default class Player {
   }
 
   moveTo (x, y) {
+    // sets destination tile
     this.setDestinationTile(x, y);
     console.log('moveTo');
-    let coords = this.convertTilePosition(x, y);
-    this.destination = [coords[0], coords[1]];
+    this.destination = this.convertTilePosition(x, y);
     console.log('destination', this.destination);
-    console.log('player x', this.playerSprite.x);
-    this.physics.moveTo(this.playerSprite, coords[0], coords[1], 30);
+    this.physics.moveTo(this.playerSprite, this.destination[0], this.destination[1], 30);
     this.isMoving = true;
   }
 
   move (direction, currentPos) {
+    // unblocks the player, sets movement direction, enables sprite movement
+    // and sends the current pos and direction to the moveTo function
     this.blocked = false;
     this.direction = direction;
     this.playerSprite.body.moves = true;
@@ -77,6 +81,8 @@ export default class Player {
   }
 
   setDestinationTile (x, y) {
+    // sets the destination tile the player will move to
+    // adds tile offset
     this.destinationTile.setPosition(
       (x * this.TILE_SIZE) + this.TILE_OFFSET,
       (y * this.TILE_SIZE) + this.TILE_OFFSET
@@ -84,6 +90,7 @@ export default class Player {
   }
 
   stopMovement () {
+    // stops player movement and clears the destination
     this.playerSprite.body.moves = false;
     this.playerSprite.setPosition(this.destination[0], this.destination[1]);
     this.prevDestination = this.getTilePosition(this.destination[0], this.destination[1]);
@@ -92,5 +99,28 @@ export default class Player {
     this.isMoving = false;
     console.log(this.playerSprite.x, this.playerSprite.y);
     console.log('stopped');
+  }
+
+  block (direction) {
+    // sets which direction in which the player is blocked
+    this.blocked = direction;
+    this.destination = null;
+    this.isMoving = false;
+  }
+
+  spawnBomb (x, y) {
+    let targetPos;
+    let bomb;
+    if (this.prevDestination) {
+      // convert the previousDestination to grid units and set it as the target
+      targetPos = this.convertTilePosition(this.prevDestination[0], this.prevDestination[1]);
+      bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.physics);
+      this.bombList.push({ bomb: bomb, pos: this.prevDestination });
+    } else {
+      // this will only be used if the player spawns a bomb before making a move
+      targetPos = this.destination;
+      bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.physics);
+      this.bombList.push({ bomb: bomb, pos: this.destination });
+    }
   }
 }

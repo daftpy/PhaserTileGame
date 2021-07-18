@@ -31,32 +31,33 @@ export default class PlayScene extends Phaser.Scene {
     this.player.playerSprite.body.collideWorldBounds = true;
     this.physics.add.collider(this.player.playerSprite, layer);
     this.player.physics = this.physics;
+    this.player.playScene = this;
 
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setZoom(6.25);
     this.cameras.main.centerToBounds();
-
     cursors = this.input.keyboard.createCursorKeys();
 
-    // let controlConfig = {
-    //   camera: this.cameras.main,
-    //   left: cursors.left,
-    //   right: cursors.right,
-    //   up: cursors.up,
-    //   down: cursors.down,
-    //   zoomIn: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q),
-    //   speed: 0.5
-    // };
-
-    // controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig);
-    console.log('fin?');
+    let controlConfig = {
+      camera: this.cameras.main,
+      left: cursors.left,
+      right: cursors.right,
+      up: cursors.up,
+      down: cursors.down,
+      zoomIn: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q),
+      speed: 0.5
+    };
+    controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig);
   }
 
   update (time, delta) {
-    // controls.update(delta);
+    controls.update(delta);
     let currentPos = this.player.getTilePosition();
+    // run the update loop for your bombs in the bomb list
+    for (let i = 0; i < this.player.bombList.length; i++) {
+      this.player.bombList[i]['bomb'].update();
+    }
     if (this.player.destination) {
-      console.log('destination');
       if (this.player.direction === 'left') {
         if (this.player.destination[0] >= this.player.playerSprite.x) {
           this.player.stopMovement();
@@ -76,72 +77,32 @@ export default class PlayScene extends Phaser.Scene {
       }
     } else {
       if (cursors.left.isDown && this.player.isMoving !== true && this.player.destination === null && this.player.blocked !== 'left') {
-        this.player.blocked = false;
-        this.player.direction = 'left';
-        this.player.playerSprite.body.moves = true;
-        if (this.player.prevDestination) {
-          this.player.moveTo(this.player.prevDestination[0] - 1, this.player.prevDestination[1]);
-        } else {
-          this.player.moveTo(currentPos[0] - 1, currentPos[1]);
-        }
-        this.player.isMoving = true;
+        this.player.move('left', currentPos);
       } else if (cursors.right.isDown && this.player.isMoving !== true && this.player.destination === null && this.player.blocked !== 'right') {
-        this.player.blocked = false;
-        this.player.playerSprite.body.moves = true;
-        this.player.direction = 'right';
-        if (this.player.prevDestination) {
-          this.player.moveTo(this.player.prevDestination[0] + 1, this.player.prevDestination[1]);
-        } else {
-          this.player.moveTo(currentPos[0] + 1, currentPos[1]);
-        }
-        this.player.isMoving = true;
+        this.player.move('right', currentPos);
       } else if (cursors.down.isDown && this.player.isMoving !== true && this.player.destination === null && this.player.blocked !== 'down') {
-        this.player.blocked = false;
-        this.player.playerSprite.body.moves = true;
-        this.player.direction = 'down';
-        if (this.player.prevDestination) {
-          this.player.moveTo(this.player.prevDestination[0], this.player.prevDestination[1] + 1);
-        } else {
-          this.player.moveTo(currentPos[0], currentPos[1] + 1);
-        }
-        this.player.isMoving = true;
+        this.player.move('down', currentPos);
       } else if (cursors.up.isDown && this.player.isMoving !== true && this.player.destination === null && this.player.blocked !== 'up') {
-        this.player.blocked = false;
-        this.player.playerSprite.body.moves = true;
-        this.player.direction = 'up';
-        if (this.player.prevDestination) {
-          this.player.moveTo(this.player.prevDestination[0], this.player.prevDestination[1] - 1);
-        } else {
-          this.player.moveTo(currentPos[0], currentPos[1] - 1);
-        }
-        this.player.isMoving = true;
-      } else {
-        // this.player.playerSprite.body.setVelocityX(0);
-        // this.player.playerSprite.body.setVelocityY(0);
+        this.player.move('up', currentPos);
       }
+    }
+
+    if (cursors.space.isDown) {
+      this.player.spawnBomb();
     }
 
     if (this.player.playerSprite.body.blocked['left']) {
       // if colliding from the left, set blocked 'left' and clear destination and set ismoving false
-      this.player.blocked = 'left';
-      this.player.destination = null;
-      this.player.isMoving = false;
+      this.player.block('left');
     } else if (this.player.playerSprite.body.blocked['right']) {
       // same as above but set blocked 'right'
-      this.player.blocked = 'right';
-      this.player.destination = null;
-      this.player.isMoving = false;
-      this.player.prevDestination = null;
+      this.player.block('right');
     } else if (this.player.playerSprite.body.blocked['up']) {
-      this.player.blocked = 'up';
-      this.player.destination = null;
-      this.player.isMoving = false;
-      this.player.prevDestination = null;
+      this.player.block('up');
     } else if (this.player.playerSprite.body.blocked['down']) {
-      this.player.blocked = 'down';
-      this.player.destination = null;
-      this.player.isMoving = false;
-      this.player.prevDestination = null;
+      this.player.block('down');
+    } else {
+      this.player.blocked = null;
     }
   }
 }
