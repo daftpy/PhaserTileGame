@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import images from './assets/*.png';
+import tilesets from './assets/tilemaps/tiles/*.png';
+import maps from './assets/tilemaps/*.csv';
 
 export default class BootScene extends Phaser.Scene {
   constructor () {
@@ -15,6 +17,8 @@ export default class BootScene extends Phaser.Scene {
     this.load.image('space', images.space);
     this.load.image('logo', images.logo);
     this.load.image('red', images.red);
+    this.load.image('tiles', tilesets.tilesetP8);
+    this.load.tilemapCSV('map', maps.boom);
 
     this.load.on('progress', function (progress) {
       bar.setScale(progress, 1);
