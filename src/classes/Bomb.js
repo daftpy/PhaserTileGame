@@ -21,7 +21,7 @@ export default class Bomb {
     var particles = this.scene.add.particles('flares');
     for (let i = 0; i < BOMB_SPEED.length; i++) {
       console.log('plume');
-      let plume = this.scene.add.rectangle(this.spriteBody.x, this.spriteBody.y, 14, 14, 0xFFFF00, 1);
+      let plume = this.scene.add.rectangle(this.spriteBody.x, this.spriteBody.y, 16, 16, 0xFFFF00, 1);
       let plumeInstance = this.physics.add.existing(plume);
       plume.alpha = 0;
       plume.body.maxSpeed = 800;
