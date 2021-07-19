@@ -14,27 +14,28 @@ export default class PlayScene extends Phaser.Scene {
         }
       }
     });
-    this.TILE_SIZE = 8;
+    this.TILE_SIZE = 16;
   }
 
   create () {
-    let map = this.make.tilemap({ key: 'map', tileWidth: 8, tileHeight: 8 });
-    let tiles = map.addTilesetImage('firstmap', 'tiles');
+    let map = this.make.tilemap({ key: 'map', tileWidth: 16, tileHeight: 16 });
+    let tiles = map.addTilesetImage('boomerman-tiles', 'tiles');
     let layer = map.createLayer(0, tiles, 0, 0);
-    let playerSprite = this.add.rectangle(52, 20, 8, 8, 0xff0000, 1);
-    let playerBBox = this.add.rectangle(52, 20, 8, 8, 0x0000ff, 1);
+    let playerSprite = this.add.rectangle(52, 20, 16, 16, 0xff0000, 1);
+    let playerBBox = this.add.rectangle(52, 20, 16, 16, 0x0000ff, 1);
     playerBBox.alpha = 0;
-    this.player = new Player(playerSprite, this.TILE_SIZE, [12, 2], playerBBox);
+    this.player = new Player(playerSprite, this.TILE_SIZE, [12, 2], playerBBox, layer);
     this.physics.add.existing(this.player.playerSprite);
-    this.player.playerSprite.body.maxSpeed = 30;
-    map.setCollision([ 786, 796 ]);
+    this.player.playerSprite.body.maxSpeed = 60;
+    this.player.playerSprite.body.pushable = false;
+    map.setCollision([ 45, 47 ]);
     this.player.playerSprite.body.collideWorldBounds = true;
     this.physics.add.collider(this.player.playerSprite, layer);
     this.player.physics = this.physics;
     this.player.playScene = this;
 
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setZoom(6.25);
+    this.cameras.main.setZoom(1.5625);
     this.cameras.main.centerToBounds();
     cursors = this.input.keyboard.createCursorKeys();
 

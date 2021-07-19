@@ -1,12 +1,13 @@
 import Bomb from './Bomb';
 
 export default class Player {
-  constructor (sprite, tileSize, tilePos, destinationTile) {
+  constructor (sprite, tileSize, tilePos, destinationTile, tileLayer) {
     this.playerSprite = sprite;
     this.TILE_SIZE = tileSize;
     this.TILE_OFFSET = tileSize / 2;
     this.physics = null;
     this.playScene = null;
+    this.tileLayer = tileLayer;
     this.bombList = [];
     this.setPosition(tilePos[0], tilePos[1]);
     this.isMoving = false;
@@ -46,7 +47,7 @@ export default class Player {
     console.log('moveTo');
     this.destination = this.convertTilePosition(x, y);
     console.log('destination', this.destination);
-    this.physics.moveTo(this.playerSprite, this.destination[0], this.destination[1], 30);
+    this.physics.moveTo(this.playerSprite, this.destination[0], this.destination[1], 60);
     this.isMoving = true;
   }
 

@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import images from './assets/*.png';
 import tilesets from './assets/tilemaps/tiles/*.png';
 import maps from './assets/tilemaps/*.csv';
+import sounds from './assets/*.wav';
+import flareScript from './assets/flares.json';
 
 export default class BootScene extends Phaser.Scene {
   constructor () {
@@ -17,8 +19,11 @@ export default class BootScene extends Phaser.Scene {
     this.load.image('space', images.space);
     this.load.image('logo', images.logo);
     this.load.image('red', images.red);
-    this.load.image('tiles', tilesets.tilesetP8);
-    this.load.tilemapCSV('map', maps.boom);
+    this.load.image('tiles', tilesets.bomberman);
+    this.load.tilemapCSV('map', maps.boomerman);
+    this.load.audio('thunder', sounds.thunder);
+    this.load.audio('death', sounds.death);
+    this.load.atlas('flares', images.flares, flareScript);
 
     this.load.on('progress', function (progress) {
       bar.setScale(progress, 1);
