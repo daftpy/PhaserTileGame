@@ -109,18 +109,28 @@ export default class Player {
   }
 
   spawnBomb (x, y) {
-    let targetPos;
+    let targetPos = null;
     let bomb;
+    let bombPos;
     if (this.prevDestination) {
+      console.log('using previous destination');
       // convert the previousDestination to grid units and set it as the target
       targetPos = this.convertTilePosition(this.prevDestination[0], this.prevDestination[1]);
+      bombPos = this.prevDestination;
+      for (let i = 0; i < this.bombList.length; i++) {
+        if (this.bombList[i]['pos'] === bombPos) {
+          targetPos = null;
+          console.log('matching backward', targetPos);
+        }
+      }
+    }
+    if (targetPos !== null) {
+      console.log('SPAWNING', targetPos);
       bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.physics);
-      this.bombList.push({ bomb: bomb, pos: this.prevDestination });
-    } else {
-      // this will only be used if the player spawns a bomb before making a move
-      targetPos = this.destination;
-      bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.physics);
-      this.bombList.push({ bomb: bomb, pos: this.destination });
+      this.bombList.push({ bomb: bomb, pos: bombPos });
+      console.log(this.bombList);
+      console.log(this.bombList.length);
+      targetPos = null;
     }
   }
 }
