@@ -18,17 +18,17 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   create () {
-    let map = this.make.tilemap({ key: 'map', tileWidth: 16, tileHeight: 16 });
+    let map = this.make.tilemap({ key: 'map' });
     let tiles = map.addTilesetImage('boomerman-tiles', 'tiles');
     let layer = map.createLayer(0, tiles, 0, 0);
     let playerSprite = this.add.rectangle(52, 20, 16, 16, 0xff0000, 1);
     let playerBBox = this.add.rectangle(52, 20, 16, 16, 0x0000ff, 1);
     playerBBox.alpha = 0;
-    this.player = new Player(playerSprite, this.TILE_SIZE, [12, 2], playerBBox, layer);
+    this.player = new Player(playerSprite, this.TILE_SIZE, [12, 2], playerBBox, map, layer);
     this.physics.add.existing(this.player.playerSprite);
     this.player.playerSprite.body.maxSpeed = 60;
     this.player.playerSprite.body.pushable = false;
-    map.setCollision([ 45, 47 ]);
+    map.setCollision([ 46, 47, 48 ]);
     this.player.playerSprite.body.collideWorldBounds = true;
     this.physics.add.collider(this.player.playerSprite, layer);
     this.player.physics = this.physics;

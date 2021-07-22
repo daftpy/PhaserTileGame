@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import images from './assets/*.png';
 import tilesets from './assets/tilemaps/tiles/*.png';
-import maps from './assets/tilemaps/*.csv';
+// import maps from './assets/tilemaps/*.csv';
+import maps from './assets/tilemaps/*.json';
 import sounds from './assets/*.wav';
 import flareScript from './assets/flares.json';
 
@@ -20,7 +21,8 @@ export default class BootScene extends Phaser.Scene {
     this.load.image('logo', images.logo);
     this.load.image('red', images.red);
     this.load.image('tiles', tilesets.bomberman);
-    this.load.tilemapCSV('map', maps.boomerman);
+    // this.load.tilemapCSV('map', maps.boomerman);
+    this.load.tilemapTiledJSON('map', maps.boomerman);
     this.load.audio('thunder', sounds.thunder);
     this.load.audio('death', sounds.death);
     this.load.atlas('flares', images.flares, flareScript);
