@@ -12,6 +12,7 @@ export default class Bomb {
     this.map = map;
     this.destructLayer = destructLayer;
     this.destructLayer.setTileIndexCallback(48, this.hitTile, this);
+    this.destructLayer.setTileIndexCallback(47, this.hitTile, this);
     this.spriteBody = this.scene.add.rectangle(x, y, 16, 16, 0x000000, 1);
     this.physics.add.existing(this.spriteBody);
     this.spriteBody.body.setImmovable(true);
@@ -90,11 +91,14 @@ export default class Bomb {
 
   hitTile (sprite, tile) {
     let targetTile = this.map.getTileAt(tile.x, tile.y);
-    let tileHealth = parseInt(targetTile.layer.data[tile.y][tile.x].properties['health']);
-    console.log(targetTile.layer.data[tile.y][tile.x]);
+    let tileHealth = parseInt(targetTile.layer.data[tile.y][tile.x].properties.health);
     if (sprite.damage === true) {
-      tileHealth = tileHealth - 1;
-      if (tileHealth === 0) {
+      console.log(tileHealth);
+      // targetTile.properties.health = parseInt(targetTile.properties.heatlh) - 1;
+      targetTile.properties.health = tileHealth - 1;
+      targetTile.tint = -1090000;
+      console.log(parseInt(targetTile.properties.health));
+      if (parseInt(targetTile.properties.health) === 0) {
         let newTile = new Phaser.Tilemaps.Tile(this.destructLayer, 313, (tile.x * 16) + (16 / 2), (tile.y * 16) + (16 / 2), 16, 16, 16, 16);
         this.destructLayer.removeTileAt(tile.x, tile.y);
         console.log(tile.x, tile.y);

@@ -48,6 +48,15 @@
          "tileheight":16,
          "tiles":[
                 {
+                 "id":46,
+                 "properties":[
+                        {
+                         "name":"health",
+                         "type":"string",
+                         "value":"2"
+                        }]
+                }, 
+                {
                  "id":47,
                  "properties":[
                         {

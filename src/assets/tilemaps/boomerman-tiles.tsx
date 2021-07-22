@@ -7,6 +7,11 @@
   <property name="health" value="1"/>
  </properties>
  <image source="C:/Users/alexa/Desktop/bomberman.png" trans="388700" width="224" height="383"/>
+ <tile id="46">
+  <properties>
+   <property name="health" value="2"/>
+  </properties>
+ </tile>
  <tile id="47">
   <properties>
    <property name="health" value="1"/>
