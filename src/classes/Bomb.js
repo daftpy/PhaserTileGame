@@ -3,94 +3,33 @@ import Phaser from 'phaser';
 var BOMB_SPEED = [800, -800];
 
 export default class Bomb {
-  constructor (x, y, creator, timer, playScene, physics, map, destructLayer) {
+  constructor (x, y, creator, timer, playScene, enemyGroup = null) {
     console.log('bomb created', x, y, playScene);
     this.creator = creator;
-    this.scene = playScene;
+    this.playScene = playScene;
     this.timer = timer;
-    this.physics = physics;
-    this.map = map;
-    this.destructLayer = destructLayer;
-    this.destructLayer.setTileIndexCallback(48, this.hitTile, this);
-    this.destructLayer.setTileIndexCallback(47, this.hitTile, this);
-    this.spriteBody = this.scene.add.rectangle(x, y, 16, 16, 0x000000, 1);
-    this.physics.add.existing(this.spriteBody);
+    this.enemyGroup = enemyGroup;
+    this.playScene.layer.setTileIndexCallback(48, this.hitTile, this);
+    this.playScene.layer.setTileIndexCallback(47, this.hitTile, this);
+    this.spriteBody = this.playScene.add.rectangle(x, y, 16, 16, 0x000000, 1);
+    this.playScene.physics.add.existing(this.spriteBody);
     this.spriteBody.body.setImmovable(true);
-    this.timedEvent = this.scene.time.delayedCall(this.timer * 1000, this.onEvent, [], this);
-    this.physics.add.collider(this.spriteBody, this.creator.playerSprite, () => {
+    this.timedEvent = this.playScene.time.delayedCall(this.timer * 1000, this.onEvent, [], this);
+    this.playScene.physics.add.collider(this.spriteBody, this.playScene.player.playerSprite, () => {
       console.log('collision');
     });
   }
 
   onEvent () {
-    this.scene.sound.play('thunder');
-    var particles = this.scene.add.particles('flares');
-    for (let i = 0; i < BOMB_SPEED.length; i++) {
-      let plume = this.scene.add.rectangle(this.spriteBody.x, this.spriteBody.y, 16, 16, 0xFFFF00, 1);
-      plume.damage = true; // this allows plumes to destroy walls
-      let plumeInstance = this.physics.add.existing(plume);
-      plume.alpha = 0;
-      plume.body.maxSpeed = 800;
-      let particle = particles.createEmitter({
-        frame: 'yellow',
-        radial: false,
-        // x: 100,
-        // y: { start: 0, end: 560, steps: 256 },
-        // speedX: { min: 200, max: 400 },
-        quantity: 4,
-        // gravityY: -50,
-        scale: { start: 0.6, end: 0, ease: 'Power3' },
-        blendMode: 'ADD',
-        follow: plume
-      });
-      plume.body.setVelocityX(BOMB_SPEED[i]);
-      let playerCollider = this.physics.add.collider(plume, this.creator.playerSprite, () => {
-        this.scene.sound.play('death');
-        plume.destroy();
-        plumeInstance.destroy();
-        console.log('death');
-      });
-      this.physics.add.collider(plume, this.creator.tileLayer, () => {
-        plume.destroy();
-        plumeInstance.destroy();
-        playerCollider.destroy();
-        particle.on = false;
-      });
-    }
-    for (let i = 0; i < BOMB_SPEED.length; i++) {
-      console.log('plume');
-      let plume = this.scene.add.rectangle(this.spriteBody.x, this.spriteBody.y, 12, 12, 0xFFFF00, 1);
-      plume.damage = true;
-      let plumeInstance = this.physics.add.existing(plume);
-      plume.body.maxSpeed = 1000;
-      let particle = particles.createEmitter({
-        frame: 'yellow',
-        radial: false,
-        quantity: 4,
-        scale: { start: 0.6, end: 0, ease: 'Power3' },
-        blendMode: 'ADD',
-        follow: plume
-      });
-      plume.body.setVelocityY(BOMB_SPEED[i]);
-      let playerCollider = this.physics.add.collider(plume, this.creator.playerSprite, () => {
-        this.scene.sound.play('death');
-        plume.destroy();
-        plumeInstance.destroy();
-        console.log('death');
-      });
-      this.physics.add.collider(plume, this.creator.tileLayer, (obj1, obj2) => {
-        plume.destroy();
-        plumeInstance.destroy();
-        playerCollider.destroy();
-        particle.on = false;
-      });
-    }
+    this.playScene.sound.play('thunder');
+    var particles = this.playScene.add.particles('flares');
+    this.createPlumes(particles);
     this.spriteBody.destroy();
     console.log('destroyed');
   }
 
   hitTile (sprite, tile) {
-    let targetTile = this.map.getTileAt(tile.x, tile.y);
+    let targetTile = this.playScene.map.getTileAt(tile.x, tile.y);
     let tileHealth = parseInt(targetTile.layer.data[tile.y][tile.x].properties.health);
     if (sprite.damage === true) {
       console.log(tileHealth);
@@ -99,13 +38,59 @@ export default class Bomb {
       targetTile.tint = -1090000;
       console.log(parseInt(targetTile.properties.health));
       if (parseInt(targetTile.properties.health) === 0) {
-        let newTile = new Phaser.Tilemaps.Tile(this.destructLayer, 313, (tile.x * 16) + (16 / 2), (tile.y * 16) + (16 / 2), 16, 16, 16, 16);
-        this.destructLayer.removeTileAt(tile.x, tile.y);
+        let newTile = new Phaser.Tilemaps.Tile(this.playScene.layer, 313, (tile.x * 16) + (16 / 2), (tile.y * 16) + (16 / 2), 16, 16, 16, 16);
+        this.playScene.layer.removeTileAt(tile.x, tile.y);
         console.log(tile.x, tile.y);
-        this.destructLayer.putTileAt(newTile, tile.x, tile.y, true);
+        this.playScene.layer.putTileAt(newTile, tile.x, tile.y, true);
       }
     }
     return false;
+  }
+
+  createPlumes (particles) {
+    for (let i = 0; i < (BOMB_SPEED.length * 2); i++) {
+      console.log('PLUMES', i);
+      let plume = this.playScene.add.rectangle(this.spriteBody.x, this.spriteBody.y, 16, 16, 0xFFFF00, 1);
+      plume.damage = true; // this allows plumes to destroy walls
+      this.playScene.physics.add.existing(plume);
+      plume.alpha = 0;
+      plume.body.maxSpeed = 800;
+      let particle = particles.createEmitter({
+        frame: 'yellow',
+        radial: false,
+        quantity: 4,
+        scale: { start: 0.6, end: 0, ease: 'Power3' },
+        blendMode: 'ADD',
+        follow: plume
+      });
+      if (i < 2) {
+        plume.body.setVelocityX(BOMB_SPEED[i]);
+      } else if (i === 3) {
+        plume.body.setVelocityY(BOMB_SPEED[0]);
+      } else {
+        plume.body.setVelocityY(BOMB_SPEED[1]);
+      }
+      let playerCollider = this.playScene.physics.add.collider(plume, this.playScene.player.playerSprite, () => {
+        this.playScene.sound.play('death');
+        plume.destroy();
+        particle.on = false;
+        console.log('death');
+        this.playScene.player.playerSprite.alpha = 0;
+      });
+      this.playScene.physics.add.collider(plume, this.playScene.layer, () => {
+        plume.destroy();
+        playerCollider.destroy();
+        particle.on = false;
+      });
+      if (this.enemyGroup) {
+        this.playScene.physics.add.collider(plume, this.enemyGroup, (obj1, obj2) => {
+          plume.destroy();
+          particle.on = false;
+          console.log('killed enemy');
+          obj2.destroy();
+        });
+      }
+    }
   }
 
   update () {

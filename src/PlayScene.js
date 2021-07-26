@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import Player from './classes/player';
+import WeakEnemy from './classes/WeakEnemy';
 
 var controls;
 var cursors;
@@ -18,23 +19,43 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   create () {
-    let map = this.make.tilemap({ key: 'map' });
-    let tiles = map.addTilesetImage('boomerman-tiles', 'tiles');
-    let layer = map.createLayer(0, tiles, 0, 0);
-    let playerSprite = this.add.rectangle(52, 20, 16, 16, 0xff0000, 1);
+    let config = {
+      classType: Phaser.GameObjects.Sprite,
+      defaultKey: null,
+      defaultFrame: null,
+      active: true,
+      maxSize: -1,
+      runChildUpdate: false,
+      createCallback: null,
+      removeCallback: null,
+      createMultipleCallback: null
+    };
+    this.enemyGroup = this.add.group(config);
+
+    this.map = this.make.tilemap({ key: 'map' });
+    let tiles = this.map.addTilesetImage('boomerman-tiles', 'tiles');
+    this.layer = this.map.createLayer(0, tiles, 0, 0);
     let playerBBox = this.add.rectangle(52, 20, 16, 16, 0x0000ff, 1);
-    playerBBox.alpha = 0;
-    this.player = new Player(playerSprite, this.TILE_SIZE, [12, 2], playerBBox, map, layer);
+    this.player = new Player(this, this.TILE_SIZE, [12, 2], playerBBox);
     this.physics.add.existing(this.player.playerSprite);
     this.player.playerSprite.body.maxSpeed = 60;
     this.player.playerSprite.body.pushable = false;
-    map.setCollision([ 46, 47, 48 ]);
+    this.map.setCollision([ 46, 47, 48 ]);
     this.player.playerSprite.body.collideWorldBounds = true;
-    this.physics.add.collider(this.player.playerSprite, layer);
-    this.player.physics = this.physics;
-    this.player.playScene = this;
+    this.physics.add.collider(this.player.playerSprite, this.layer);
 
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    let enemy = new WeakEnemy(24, 24, this, this.physics, this.layer, this.map);
+
+    enemy.spriteBody.body.maxSpeed = 60;
+    enemy.spriteBody.body.pushable = false;
+    enemy.spriteBody.body.collideWorldBounds = true;
+    this.physics.add.collider(enemy.spriteBody, this.layer);
+    enemy.findDirection();
+
+    this.enemyGroup.add(enemy.spriteBody);
+    console.log(this.enemyGroup);
+
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     this.cameras.main.setZoom(1.5625);
     this.cameras.main.centerToBounds();
     cursors = this.input.keyboard.createCursorKeys();

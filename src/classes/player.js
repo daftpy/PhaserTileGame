@@ -1,14 +1,12 @@
 import Bomb from './Bomb';
 
 export default class Player {
-  constructor (sprite, tileSize, tilePos, destinationTile, map, tileLayer) {
-    this.playerSprite = sprite;
+  constructor (scene, tileSize, tilePos, destinationTile) {
     this.TILE_SIZE = tileSize;
     this.TILE_OFFSET = tileSize / 2;
-    this.physics = null;
-    this.playScene = null;
-    this.map = map;
-    this.tileLayer = tileLayer;
+    this.playScene = scene;
+    this.physics = this.playScene.physics;
+    this.playerSprite = this.playScene.add.rectangle(52, 20, 16, 16, 0xff0000, 1);
     this.bombList = [];
     this.setPosition(tilePos[0], tilePos[1]);
     this.isMoving = false;
@@ -48,7 +46,7 @@ export default class Player {
     console.log('moveTo');
     this.destination = this.convertTilePosition(x, y);
     console.log('destination', this.destination);
-    this.physics.moveTo(this.playerSprite, this.destination[0], this.destination[1], 60);
+    this.playScene.physics.moveTo(this.playerSprite, this.destination[0], this.destination[1], 30);
     this.isMoving = true;
   }
 
@@ -128,7 +126,7 @@ export default class Player {
     }
     if (targetPos !== null) {
       console.log('SPAWNING', targetPos);
-      bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.physics, this.map, this.tileLayer);
+      bomb = new Bomb(targetPos[0], targetPos[1], this, 3, this.playScene, this.playScene.enemyGroup);
       this.bombList.push({ bomb: bomb, pos: bombPos });
       console.log(this.bombList);
       console.log(this.bombList.length);
